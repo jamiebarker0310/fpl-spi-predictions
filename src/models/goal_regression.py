@@ -8,12 +8,47 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.multioutput import MultiOutputRegressor
 
 
-def train_model(df, feature_cols, target_col):
+
+class SPIMapper(BaseEstimator, TransformerMixin):
+
+    def __init__(self, df_team) -> None:
+        super().__init__()
+        self.df_team = df_team
+
+
+    def fit(self, X, y=None):
+
+        return self
+    
+    def transform(self, X, y=None):
+
+        X = X.merge(
+            self.df_team.add_suffix(1),
+            left_on="team1",
+            right_on="name1",
+            how="left"
+        ).merge(
+            self.df_team.add_suffix(2),
+            left_on="team2",
+            right_on="name2",
+            how="left"
+        )[['league', 'spi1','off1','def1','spi2','off2','def2']].fillna(-1)
+
+        return X
+
+
+def train_model(df, df_team):
+
+    feature_cols = ["league", "team1", "team2"]
+    target_cols = ["proj_score1", "proj_score2"]
+
     # Assume we have a dataframe `df` with columns `numeric_col` and `categorical_col`
     numeric_features = ["spi1", "off1", "def1", "spi2", "off2", "def2"]
-    categorical_features = ["league_id"]
+    categorical_features = ["league"]
 
     # Define the transformers for preprocessing
     preprocessor = ColumnTransformer(
@@ -24,27 +59,30 @@ def train_model(df, feature_cols, target_col):
     )
 
     # Define the pipeline
-    pipe = Pipeline([("preprocessor", preprocessor), ("regressor", XGBRegressor())])
+    pipe = Pipeline([
+        ('spi_mapper', SPIMapper(df_team)),
+        ('preprocessor', preprocessor),
+        ('regressor', MultiOutputRegressor(XGBRegressor()))
+    ])
 
     param_grid = {
-        # 'regressor__max_depth': [3, 5, 7],
-        # 'regressor__learning_rate': [0.1, 0.01, 0.001],
-        # 'regressor__n_estimators': [100, 500, 1000],
-        # 'regressor__gamma': [0, 0.1],
+        # 'regressor__max_depth': [7],
+        # 'regressor__learning_rate': [0.001],
+        # 'regressor__n_estimators': [1000],
+        # 'regressor__gamma': [0.1],
     }
 
     # Fit the pipeline to the data
     X = df[feature_cols]  # X is the input features
-    y = df[target_col]  # y is the target variable
+    y = df[target_cols]  # y is the target variable
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.9)
 
     cv = GridSearchCV(
-        pipe, param_grid, scoring="neg_root_mean_squared_error", cv=3, verbose=2
+        pipe, param_grid, scoring="neg_root_mean_squared_error", cv=5, verbose=2
     )
     cv.fit(X_train, y_train)
 
-    logger = logging.getLogger(__name__)
     logging.getLogger().setLevel(logging.INFO)
 
     score = cv.score(X_test, y_test)
@@ -55,16 +93,15 @@ def train_model(df, feature_cols, target_col):
 
 
 def main():
+
     df = pd.read_csv("data/interim/matches.csv")
-    feature_cols = ["league_id", "spi1", "off1", "def1", "spi2", "off2", "def2"]
+    df_team = pd.read_csv("data/interim/team.csv")
 
-    for target_col in ["proj_score1", "proj_score2"]:
-        cv = train_model(df, feature_cols, target_col)
-        dump(cv, f"models/{target_col}.joblib")
+    cv = train_model(df, df_team)
+    dump(cv, f"models/goal_regressor.joblib")
 
-    for target_col in ["proj_score1", "proj_score2"]:
-        cv = load(f"models/{target_col}.joblib")
-        df[f"{target_col}_pred"] = cv.predict(df[feature_cols])
+    cv = load(f"models/goal_regressor.joblib")
+    df[["proj_score1_pred", "proj_score2_pred"]] = cv.predict(df[["league", "team1", "team2"]])
 
     df.to_csv("data/interim/outputted_scores.csv", index=False)
 
