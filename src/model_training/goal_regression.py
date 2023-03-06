@@ -11,34 +11,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.multioutput import MultiOutputRegressor
 
-
-
-class SPIMapper(BaseEstimator, TransformerMixin):
-
-    def __init__(self, df_team) -> None:
-        super().__init__()
-        self.df_team = df_team
-
-
-    def fit(self, X, y=None):
-
-        return self
-    
-    def transform(self, X, y=None):
-
-        X = X.merge(
-            self.df_team.add_suffix(1),
-            left_on="team1",
-            right_on="name1",
-            how="left"
-        ).merge(
-            self.df_team.add_suffix(2),
-            left_on="team2",
-            right_on="name2",
-            how="left"
-        )[['league', 'spi1','off1','def1','spi2','off2','def2']].fillna(-1)
-
-        return X
+from src.models.spimapper import SPIMapper
 
 
 def train_model(df, df_team):
@@ -66,10 +39,14 @@ def train_model(df, df_team):
     ])
 
     param_grid = {
-        # 'regressor__max_depth': [7],
-        # 'regressor__learning_rate': [0.001],
-        # 'regressor__n_estimators': [1000],
-        # 'regressor__gamma': [0.1],
+        # 'regressor__estimator__learning_rate': [0.05, 0.1, 0.15],
+        # 'regressor__estimator__max_depth': [3, 4, 5],
+        # 'regressor__estimator__n_estimators': [50, 100, 150],
+        # 'regressor__estimator__subsample': [0.8, 1.0],
+        # 'regressor__estimator__colsample_bytree': [0.8, 1.0],
+        # 'regressor__estimator__gamma': [0, 0.1, 0.2],
+        # 'regressor__estimator__reg_alpha': [0, 0.1, 0.5],
+        # 'regressor__estimator__reg_lambda': [0, 1, 10],
     }
 
     # Fit the pipeline to the data
@@ -98,9 +75,11 @@ def main():
     df_team = pd.read_csv("data/interim/team.csv")
 
     cv = train_model(df, df_team)
-    dump(cv, f"models/goal_regressor.joblib")
 
-    cv = load(f"models/goal_regressor.joblib")
+    dump(cv.best_estimator_, "models/goal_regressor.joblib")
+
+    cv = load("models/goal_regressor.joblib")
+    
     df[["proj_score1_pred", "proj_score2_pred"]] = cv.predict(df[["league", "team1", "team2"]])
 
     df.to_csv("data/interim/outputted_scores.csv", index=False)
