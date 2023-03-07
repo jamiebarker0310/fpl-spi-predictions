@@ -25,8 +25,8 @@ def simulate_matches(df, n_distributions, diagonal_inflation):
     df1["result"] = df1.diff(axis=1)[2].apply(np.sign).map({-1: "1", 0: "tie", 1: "2"})
 
     # calculate clean sheets
-    df1["cs1"] = df1[1] == 0
-    df1["cs2"] = df1[2] == 0
+    df1["cs1"] = df1[2] == 0
+    df1["cs2"] = df1[1] == 0
 
     # set value for diagonal inflation
     df1["count"] = 1
