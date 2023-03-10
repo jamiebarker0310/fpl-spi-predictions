@@ -2,17 +2,14 @@ import pandas as pd
 
 
 def filter_match_data(df_match, df_team):
+    
     cols = ["league", "team1", "team2", "proj_score1", "proj_score2"]
-
-    df_match.loc[df_match.score1.isna(), cols]
-
-    df_team["name"].unique()
 
     cond1 = df_match["team1"].isin(df_team["name"].unique())
     cond2 = df_match["team2"].isin(df_team["name"].unique())
     cond3 = df_match.score1.isna()
 
-    return df_match.loc[(cond1) & (cond2) & (cond3)]
+    return df_match.loc[(cond1) & (cond2) & (cond3), cols]
 
 
 def filter_team_data(df):
