@@ -33,6 +33,7 @@ jobs:
       run: flake8 
 
   test:
+    needs: [lint]
     name: Test Python ${{ matrix.python }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
