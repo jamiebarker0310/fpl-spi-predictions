@@ -1,5 +1,5 @@
 black>=23.1.0
-httpx>=4.5.0
+httpx>=0.23.0
 fastapi>=0.92.0
 flake8>=5.0.4
 matplotlib>=3.5.3
