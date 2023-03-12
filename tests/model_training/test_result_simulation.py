@@ -8,6 +8,10 @@ from src.model_training.result_simulation import (
 )
 
 
+def list_cols(df):
+    return df.columns.values.tolist()
+
+
 @pytest.fixture
 def test_df():
     df = pd.DataFrame(
@@ -31,18 +35,11 @@ def test_create_search():
 
 def test_holdout_split(test_df):
     X_train, X_test, y_train, y_test = holdout_split(test_df, train_size=2 / 3)
+    expected_y_cols = ["prob1", "prob2", "probtie"]
+    assert list_cols(y_train) == list_cols(y_test) == expected_y_cols
 
-    assert (
-        y_train.columns.values.tolist()
-        == y_test.columns.values.tolist()
-        == ["prob1", "prob2", "probtie"]
-    )
-
-    assert (
-        X_train.columns.values.tolist()
-        == X_test.columns.values.tolist()
-        == ["proj_score1_pred", "proj_score2_pred"]
-    )
+    expected_x_cols = ["proj_score1_pred", "proj_score2_pred"]
+    assert list_cols(X_train) == list_cols(X_test) == expected_x_cols
 
     assert len(X_train) == len(y_train) == 2
 

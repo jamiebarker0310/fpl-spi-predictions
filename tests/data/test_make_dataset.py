@@ -7,14 +7,15 @@ from src.data.make_dataset import initialise_file_url_pairs, download_file
 
 
 def test_initialise_file_url_pairs():
+    base_url = "https://projects.fivethirtyeight.com/soccer-api/club"
     expected_pairs = [
         (
             "matches",
-            "https://projects.fivethirtyeight.com/soccer-api/club/spi_matches_latest.csv",
+            f"{base_url}/spi_matches_latest.csv",
         ),
         (
             "teams",
-            "https://projects.fivethirtyeight.com/soccer-api/club/spi_global_rankings.csv",
+            f"{base_url}/spi_global_rankings.csv",
         ),
     ]
 

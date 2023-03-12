@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 def initialise_file_url_pairs():
-
     base_url = "https://projects.fivethirtyeight.com/soccer-api/club"
     file_url_pairs = [
         (
