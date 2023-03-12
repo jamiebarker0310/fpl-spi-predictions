@@ -1,17 +1,14 @@
-from typing import Union
 import logging
 from enum import Enum
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI
 from joblib import load
 import pandas as pd
 
-from src.models.spimapper import SPIMapper
-
-goal_regressor = load(f"models/goal_regressor.joblib")
+goal_regressor = load("models/goal_regressor.joblib")
 
 result_simulator = load("models/poisson.joblib")
+
 
 class Team(str, Enum):
     bou = "AFC Bournemouth"
@@ -48,48 +45,53 @@ def root():
 
 @app.get("/predict_score")
 async def predict_score(team1: Team, team2: Team):
+    match = pd.DataFrame(
+        {"league": ["Barclays Premier League"], "team1": [team1], "team2": [team2]}
+    )
 
-    match = pd.DataFrame({
-        "league": ["Barclays Premier League"],
-        "team1": [team1],
-        "team2": [team2]
-    })
-    
     result = goal_regressor.predict(match)
 
-    result_dict = {"proj_score1": float(result[0][0]),"proj_score2": float(result[0][1])}
+    result_dict = {
+        "proj_score1": float(result[0][0]),
+        "proj_score2": float(result[0][1]),
+    }
 
     return result_dict
 
+
 @app.get("/simulate_match_from_score")
 async def simulate_match_from_score(score1: float, score2: float):
+    match = pd.DataFrame(
+        {
+            "proj_score1_pred": [score1],
+            "proj_score2_pred": [score2],
+        }
+    )
 
-    match = pd.DataFrame({
-        "proj_score1_pred": [score1],
-        "proj_score2_pred": [score2],
-    })
-    
     result_dict = result_simulator.predict(match).iloc[0].to_dict()
 
     return result_dict
 
+
 @app.get("/simulate_match")
 async def simulate_match(team1: Team, team2: Team):
+    match = pd.DataFrame(
+        {"league": ["Barclays Premier League"], "team1": [team1], "team2": [team2]}
+    )
 
-    match = pd.DataFrame({
-        "league": ["Barclays Premier League"],
-        "team1": [team1],
-        "team2": [team2]
-    })
-    
     result = goal_regressor.predict(match)
 
-    result_dict = {"proj_score1": float(result[0][0]),"proj_score2": float(result[0][1])}
+    result_dict = {
+        "proj_score1": float(result[0][0]),
+        "proj_score2": float(result[0][1]),
+    }
 
-    match = pd.DataFrame({
-        "proj_score1_pred": [result[0][0]],
-        "proj_score2_pred": [result[0][1]],
-    })
+    match = pd.DataFrame(
+        {
+            "proj_score1_pred": [result[0][0]],
+            "proj_score2_pred": [result[0][1]],
+        }
+    )
 
     result_dict = {**result_dict, **result_simulator.predict(match).iloc[0].to_dict()}
 

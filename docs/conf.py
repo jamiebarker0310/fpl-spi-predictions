@@ -11,9 +11,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
-import sys
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -241,7 +238,8 @@ texinfo_documents = [
         "fpl-spi-predictions Documentation",
         "Jamie Barker",
         "fpl-spi-predictions",
-        "recreating the SPI predictions for any premier league game, in order to help forecast for unarranged fixtures in FPL",
+        "recreating the SPI predictions for any premier league game, \
+            in order to help forecast for unarranged fixtures in FPL",
         "Miscellaneous",
     ),
 ]
