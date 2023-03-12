@@ -26,9 +26,8 @@ def test_match_data():
 def test_team_data():
     df = pd.DataFrame(
         {
-            "name": sum(
-                [f"team1-{i+1}" for i in range(5)], [f"team2-{i+1}" for i in range(5)]
-            ),
+            "name": [f"team1-{i+1}" for i in range(5)]
+            + [f"team2-{i+1}" for i in range(5)],
             "league": [f"league{i}" for i in range(10)],
             "off": [1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5],
             "def": [1.2, 1.3, 1.4, 1.5, 1.6, 2.2, 2.3, 2.4, 2.5, 2.6],
@@ -62,9 +61,8 @@ def test_filter_team_data(test_team_data):
 
     expected = pd.DataFrame(
         {
-            "name": sum(
-                [f"team1-{i+1}" for i in range(5)], [f"team2-{i+1}" for i in range(5)]
-            ),
+            "name": [f"team1-{i+1}" for i in range(5)]
+            + [f"team2-{i+1}" for i in range(5)],
             "off": [1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5],
             "def": [1.2, 1.3, 1.4, 1.5, 1.6, 2.2, 2.3, 2.4, 2.5, 2.6],
             "spi": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
