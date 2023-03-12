@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -26,8 +27,8 @@ def test_initialise_file_url_pairs():
 def test_file():
     name = "test"
     url = "https://projects.fivethirtyeight.com/soccer-api/club/spi_global_rankings.csv"
-    path = "data/test/"
-    os.mkdir(path)
+    path = Path("data/test/")
+    path.mkdir(parents=True)
     download_file(name, url, path)
     yield f"{path}{name}.csv"
     os.remove(f"{path}{name}.csv")
