@@ -67,8 +67,6 @@ def main():
 
     cv = load("models/poisson.joblib")
 
-    cv.target_cols = None
-
     df = pd.concat(
         [
             df,
