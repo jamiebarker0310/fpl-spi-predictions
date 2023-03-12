@@ -35,9 +35,7 @@ class Team(str, Enum):
     wol = "Wolverhampton"
 
 
-
 class PredictedResult(BaseModel):
-    
     team1: Union[Team, None] = None
     team2: Union[Team, None] = None
 
@@ -62,7 +60,9 @@ def root():
     return {"message": "Welcome to Your Football Score Predictor FastAPI"}
 
 
-@app.get("/predict_score", response_model=PredictedResult, response_model_exclude_none=True)
+@app.get(
+    "/predict_score", response_model=PredictedResult, response_model_exclude_none=True
+)
 async def predict_score(team1: Team, team2: Team):
     match = pd.DataFrame(
         {"league": ["Barclays Premier League"], "team1": [team1], "team2": [team2]}
@@ -80,7 +80,11 @@ async def predict_score(team1: Team, team2: Team):
     return result_dict
 
 
-@app.get("/simulate_match_from_score", response_model=PredictedResult, response_model_exclude_none=True)
+@app.get(
+    "/simulate_match_from_score",
+    response_model=PredictedResult,
+    response_model_exclude_none=True,
+)
 async def simulate_match_from_score(score1: confloat(ge=0), score2: confloat(ge=0)):
     match = pd.DataFrame(
         {
