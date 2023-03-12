@@ -12,6 +12,7 @@ on:
 jobs:
   lint:
     name: Test Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repo
