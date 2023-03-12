@@ -58,7 +58,7 @@ def test_create_pipeline(test_team_df):
     assert isinstance(response, Pipeline)
 
 
-def test_train_test_split(test_match_df):
+def test_holdout_split(test_match_df):
     X_train, X_test, y_train, y_test = holdout_split(test_match_df, train_size=5 / 6)
 
     assert y_train.columns.values.tolist() == ["proj_score1", "proj_score2"]

@@ -3,55 +3,73 @@ import numpy as np
 from scipy.stats import poisson
 import pandas as pd
 
-def simulate_matches(df, n_distributions, diagonal_inflation):
+
+def create_simulations(df, n_simulations):
     # intialise arrays
-    X = np.ones((len(df), n_distributions, 2))
+    X = np.ones((len(df), n_simulations, 2))
     # create array of distributions for each parameter
     mus = X * df.values.reshape(len(df), 1, 2)
     # sample from distributions
     samples = poisson.rvs(mus).reshape(mus.shape)
 
+    return samples
+
+
+def simulations_to_df(df, simulations):
     # initialise multi-index
     index = pd.MultiIndex.from_product(
-        [df.index.values, range(n_distributions)], names=["match", "simulation"]
+        [df.index.values, range(simulations.shape[1])], names=["match", "simulation"]
     )
-    df1 = pd.DataFrame(index=index, columns=[1, 2])
+    df_sim = pd.DataFrame(index=index, columns=[1, 2])
 
     # set values with simulations
-    df1.loc[:, 1] = samples[:, :, 0].flatten()
-    df1.loc[:, 2] = samples[:, :, 1].flatten()
+    df_sim.loc[:, 1] = simulations[:, :, 0].flatten()
+    df_sim.loc[:, 2] = simulations[:, :, 1].flatten()
 
+    return df_sim
+
+
+def calculate_match_stats(df_sim):
     # calculate result
-    df1["result"] = df1.diff(axis=1)[2].apply(np.sign).map({-1: "1", 0: "tie", 1: "2"})
+    df_sim["result"] = (
+        df_sim.diff(axis=1)[2].apply(np.sign).map({-1: "1", 0: "tie", 1: "2"})
+    )
 
     # calculate clean sheets
-    df1["cs1"] = df1[2] == 0
-    df1["cs2"] = df1[1] == 0
+    df_sim["cs1"] = df_sim[2] == 0
+    df_sim["cs2"] = df_sim[1] == 0
 
+    return df_sim
+
+
+def diagonal_inflation(df_sim, draw_inflation):
     # set value for diagonal inflation
-    df1["count"] = 1
-    df1.loc[df1["result"] == "tie", "count"] = diagonal_inflation
+    df_sim["count"] = 1
+    df_sim.loc[df_sim["result"] == "tie", "count"] = draw_inflation
 
     # reset index
-    df1 = df1.reset_index()
+    df_sim = df_sim.reset_index()
 
+    return df_sim
+
+
+def calculate_probabilities(df_sim):
     # initialise probabilities
     probabilities = []
-
     # for results and clean sheets
     for col in ["result", "cs1", "cs2"]:
         # calculate sum of each
-        df2 = df1.groupby(["match", col])["count"].sum().unstack()
+        df_sim_agg = df_sim.groupby(["match", col])["count"].sum().unstack()
         # adjust column names to avoid duplicates
-        df2.columns = [(col, col1) for col1 in df2.columns]
+        df_sim_agg.columns = [(col, col1) for col1 in df_sim_agg.columns]
         # convert sum into probability
-        df2 = df2.div(df2.sum(axis=1), axis=0)
+        df_sim_agg = df_sim_agg.div(df_sim_agg.sum(axis=1), axis=0)
         # add to list
-        probabilities.append(df2.copy(deep=True))
+        probabilities.append(df_sim_agg.copy(deep=True))
     # concatenate probabilities
-    df1 = pd.concat(probabilities, axis=1)
+    df = pd.concat(probabilities, axis=1)
     # keep only required columns
-    df1 = df1[
+    df = df[
         [
             ("result", "1"),
             ("result", "2"),
@@ -60,10 +78,24 @@ def simulate_matches(df, n_distributions, diagonal_inflation):
             ("cs2", True),
         ]
     ]
-    # rename columns
-    df1.columns = ["prob1", "prob2", "probtie", "cs1", "cs2"]
-    # return dataframe
-    return df1
+
+    df.columns = ["prob1", "prob2", "probtie", "cs1", "cs2"]
+
+    return df.fillna(0)
+
+
+def simulate_matches(df, n_simulations, draw_inflation):
+    simulations = create_simulations(df, n_simulations)
+
+    df_sim = simulations_to_df(df, simulations)
+
+    df_sim = calculate_match_stats(df_sim)
+
+    df_sim = diagonal_inflation(df_sim, draw_inflation)
+
+    df_prob = calculate_probabilities(df_sim)
+
+    return df_prob
 
 
 class PoissonSimulator(BaseEstimator):
@@ -71,21 +103,18 @@ class PoissonSimulator(BaseEstimator):
         self,
         target_cols=None,
         diagonal_inflation=1.09,
-        n_distributions=1_000,
-        score_cols=("proj_score1_pred", "proj_score2_pred"),
+        n_simulations=1_000,
     ) -> None:
         super().__init__()
         self.target_cols = target_cols
         self.diagonal_inflation = diagonal_inflation
-        self.n_distributions = n_distributions
-
-        self.score_cols = score_cols
+        self.n_simulations = n_simulations
 
     def fit(self, X=None, y=None):
         pass
 
     def predict(self, X, y=None):
-        df = simulate_matches(X, self.n_distributions, self.diagonal_inflation)
+        df = simulate_matches(X, self.n_simulations, self.diagonal_inflation)
 
         if self.target_cols:
             return df[self.target_cols]

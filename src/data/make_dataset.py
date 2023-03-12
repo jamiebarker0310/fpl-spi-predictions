@@ -8,8 +8,8 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-def initialise_file_url_pairs():
 
+def initialise_file_url_pairs():
     file_url_pairs = [
         (
             "matches",
@@ -24,9 +24,7 @@ def initialise_file_url_pairs():
     return file_url_pairs
 
 
-
 def download_file(name, url, path="data/external/"):
-    
     logger.info(f"downloading {name} csv from: {url}")
     df = pd.read_csv(url)
 
@@ -43,7 +41,6 @@ def main():
     file_url_pairs = initialise_file_url_pairs()
     for name, url in file_url_pairs:
         download_file(name, url)
-        
 
 
 if __name__ == "__main__":

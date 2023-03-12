@@ -5,8 +5,8 @@ import pytest
 
 from src.data.make_dataset import initialise_file_url_pairs, download_file
 
-def test_initialise_file_url_pairs():
 
+def test_initialise_file_url_pairs():
     expected_pairs = [
         (
             "matches",
@@ -20,6 +20,7 @@ def test_initialise_file_url_pairs():
 
     assert initialise_file_url_pairs() == expected_pairs
 
+
 @pytest.fixture
 def test_file():
     name = "test"
@@ -30,6 +31,7 @@ def test_file():
     yield f"{path}{name}.csv"
     os.remove(f"{path}{name}.csv")
     os.rmdir(path)
+
 
 def test_download_file(test_file):
     assert os.path.exists(test_file)

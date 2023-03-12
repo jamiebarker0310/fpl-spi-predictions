@@ -1,4 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SPIMapper(BaseEstimator, TransformerMixin):
@@ -10,20 +13,21 @@ class SPIMapper(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X = (
-            X.merge(
-                self.df_team.add_suffix(1),
-                left_on="team1",
-                right_on="name1",
-                how="left",
-            )
-            .merge(
-                self.df_team.add_suffix(2),
-                left_on="team2",
-                right_on="name2",
-                how="left",
-            )[["league", "spi1", "off1", "def1", "spi2", "off2", "def2"]]
-            .fillna(-1)
-        )
+        X = X.merge(
+            self.df_team.add_suffix(1),
+            left_on="team1",
+            right_on="name1",
+            how="left",
+        ).merge(
+            self.df_team.add_suffix(2),
+            left_on="team2",
+            right_on="name2",
+            how="left",
+        )[
+            ["league", "spi1", "off1", "def1", "spi2", "off2", "def2"]
+        ]
+
+        if X.isnull().values.any():
+            logger.warning("NAs detected in outputted")
 
         return X

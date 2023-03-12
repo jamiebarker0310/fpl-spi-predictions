@@ -2,7 +2,6 @@ import pandas as pd
 
 
 def filter_match_data(df_match, df_team):
-    
     cols = ["league", "team1", "team2", "proj_score1", "proj_score2"]
 
     cond1 = df_match["team1"].isin(df_team["name"].unique())
