@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-import click
 import logging
-from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
 
 import pandas as pd
 
@@ -10,14 +7,16 @@ logger = logging.getLogger(__name__)
 
 
 def initialise_file_url_pairs():
+
+    base_url = "https://projects.fivethirtyeight.com/soccer-api/club"
     file_url_pairs = [
         (
             "matches",
-            "https://projects.fivethirtyeight.com/soccer-api/club/spi_matches_latest.csv",
+            f"{base_url}/spi_matches_latest.csv",
         ),
         (
             "teams",
-            "https://projects.fivethirtyeight.com/soccer-api/club/spi_global_rankings.csv",
+            f"{base_url}/spi_global_rankings.csv",
         ),
     ]
 

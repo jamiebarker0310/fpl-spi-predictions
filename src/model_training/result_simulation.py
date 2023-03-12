@@ -8,22 +8,26 @@ from src.models.poisson_simulator import PoissonSimulator
 
 logger = logging.Logger(__name__)
 
-def create_search():
 
+def create_search():
     param_grid = {
         "diagonal_inflation": np.linspace(0.9, 1.3, 3),
     }
 
     cv = GridSearchCV(
         PoissonSimulator(
-            target_cols=["prob1","prob2","probtie"],
-        ), param_grid, scoring="neg_root_mean_squared_error", cv=2, verbose=2
+            target_cols=["prob1", "prob2", "probtie"],
+        ),
+        param_grid,
+        scoring="neg_root_mean_squared_error",
+        cv=2,
+        verbose=2,
     )
 
     return cv
 
-def holdout_split(df, train_size=0.9):
 
+def holdout_split(df, train_size=0.9):
     feature_cols = ["proj_score1_pred", "proj_score2_pred"]
 
     target_cols = ["prob1", "prob2", "probtie"]
@@ -36,8 +40,8 @@ def holdout_split(df, train_size=0.9):
 
     return X_train, X_test, y_train, y_test
 
-def train_model(df):
 
+def train_model(df):
     search = create_search()
 
     X_train, X_test, y_train, y_test = holdout_split(df)
@@ -59,9 +63,9 @@ def main():
 
     cv.best_estimator_.target_cols = None
 
-    dump(cv.best_estimator_, f"models/poisson.joblib")
+    dump(cv.best_estimator_, "models/poisson.joblib")
 
-    cv = load(f"models/poisson.joblib")
+    cv = load("models/poisson.joblib")
 
     cv.target_cols = None
 

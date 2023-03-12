@@ -1,15 +1,11 @@
-from typing import Union
 import logging
 from enum import Enum
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI
 from joblib import load
 import pandas as pd
 
-from src.models.spimapper import SPIMapper
-
-goal_regressor = load(f"models/goal_regressor.joblib")
+goal_regressor = load("models/goal_regressor.joblib")
 
 result_simulator = load("models/poisson.joblib")
 

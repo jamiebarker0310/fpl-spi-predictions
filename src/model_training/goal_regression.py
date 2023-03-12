@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from xgboost import XGBRegressor
 from joblib import dump, load
 import logging
