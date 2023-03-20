@@ -3,10 +3,11 @@ from xgboost import XGBRegressor
 from joblib import dump, load
 import logging
 
+from scipy import stats
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from sklearn.multioutput import MultiOutputRegressor
 
 from src.models.spimapper import SPIMapper
@@ -43,22 +44,22 @@ def create_pipeline(df_team):
     return pipe
 
 
-def create_search(df_team):
+def create_search(df_team, n_iter=60):
     pipe = create_pipeline(df_team)
 
-    param_grid = {
-        # 'regressor__estimator__learning_rate': [0.05, 0.1, 0.15],
-        # 'regressor__estimator__max_depth': [3, 4, 5],
-        # 'regressor__estimator__n_estimators': [50, 100, 150],
-        # 'regressor__estimator__subsample': [0.8, 1.0],
-        # 'regressor__estimator__colsample_bytree': [0.8, 1.0],
-        # 'regressor__estimator__gamma': [0, 0.1, 0.2],
-        # 'regressor__estimator__reg_alpha': [0, 0.1, 0.5],
-        # 'regressor__estimator__reg_lambda': [0, 1, 10],
+    param_dist = {
+        "regressor__estimator__learning_rate": [0.05, 0.1, 0.15],
+        "regressor__estimator__max_depth": [3, 4, 5],
+        "regressor__estimator__n_estimators": stats.randint(100, 200),
+        "regressor__estimator__subsample": stats.uniform(0.8, 0.2),
+        "regressor__estimator__colsample_bytree": stats.uniform(0.8, 0.2),
+        "regressor__estimator__gamma": stats.uniform(0, 0.2),
+        "regressor__estimator__reg_alpha": stats.loguniform(10**-3, 0.5),
+        "regressor__estimator__reg_lambda": stats.loguniform(10**-3, 10),
     }
 
-    cv = GridSearchCV(
-        pipe, param_grid, scoring="neg_root_mean_squared_error", cv=5, verbose=2
+    cv = RandomizedSearchCV(
+        pipe, param_dist, scoring="neg_root_mean_squared_error", cv=3, n_iter=n_iter
     )
 
     return cv
@@ -77,8 +78,8 @@ def holdout_split(df, train_size=0.9):
     return X_train, X_test, y_train, y_test
 
 
-def train_model(df, df_team):
-    cv = create_search(df_team)
+def train_model(df, df_team, n_iter=60):
+    cv = create_search(df_team, n_iter=n_iter)
 
     X_train, X_test, y_train, y_test = holdout_split(df)
 
@@ -89,6 +90,9 @@ def train_model(df, df_team):
     score = cv.score(X_test, y_test)
 
     logging.info(f"test score: {score}")
+
+    for key, value in cv.best_params_.items():
+        logging.info(f"best {key}: {value}")
 
     return cv
 

@@ -6,12 +6,10 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 
 from src.models.poisson_simulator import PoissonSimulator
 
-logger = logging.Logger(__name__)
-
 
 def create_search():
     param_grid = {
-        "diagonal_inflation": np.linspace(0.9, 1.3, 3),
+        "diagonal_inflation": np.linspace(0.9, 1.3, 41),
     }
 
     cv = GridSearchCV(
@@ -50,8 +48,11 @@ def train_model(df):
 
     score = search.score(X_test, y_test)
 
-    logger.info(f"test score: {score}")
-    logger.info(f"best parameters: {search.best_params_}")
+    logging.getLogger().setLevel(logging.INFO)
+
+    logging.info(f"test score: {score}")
+    for key, value in search.best_params_.items():
+        logging.info(f"best {key}: {value}")
 
     return search
 

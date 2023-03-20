@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from src.model_training.goal_regression import (
@@ -73,10 +73,10 @@ def test_holdout_split(test_match_df):
 def test_create_search(test_team_df):
     response = create_search(test_team_df)
 
-    assert isinstance(response, GridSearchCV)
+    assert isinstance(response, RandomizedSearchCV)
 
 
 def test_train_model(test_match_df, test_team_df):
-    response = train_model(test_match_df, test_team_df)
+    response = train_model(test_match_df, test_team_df, n_iter=3)
 
-    assert isinstance(response, GridSearchCV)
+    assert isinstance(response, RandomizedSearchCV)
