@@ -16,6 +16,9 @@ def test_match_data():
             "proj_score2": [0.5, 1.1, 2.2, 3.3, 1.1],
             "score1": [0, np.nan, np.nan, np.nan, np.nan],
             "score2": [4, np.nan, np.nan, np.nan, np.nan],
+            "prob1": [0.5, 0.5, 0.5, 0.1, 0.5],
+            "probtie": [0.4, 0.4, 0.4, 0.4, 0.4],
+            "prob2": [0.1, 0.1, 0.1, 0.5, 0.1],
         }
     )
 
@@ -50,6 +53,9 @@ def test_filter_match_data(test_match_data, test_team_data):
             "team2": [f"team2-{i+1}" for i in range(3, 5)],
             "proj_score1": [1.1, 2.2],
             "proj_score2": [3.3, 1.1],
+            "prob1": [0.1, 0.5],
+            "probtie": [0.4, 0.4],
+            "prob2": [0.5, 0.1],
         }
     )
 
