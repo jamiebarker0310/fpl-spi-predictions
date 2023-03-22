@@ -15,13 +15,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repo (pull request)
       uses: actions/checkout@v3
+      if: github.event_name == 'pull_request'
       with:
         ref: ${{ github.event.pull_request.head.ref }} # Checkout the feature branch on a pull request event
-        # Check if the event is a scheduled event, and checkout the main branch if true
-        if: github.event_name == 'schedule'
+    
+    - name: Checkout repo (schedule)
+      uses: actions/checkout@v3
+      if: github.event_name == 'schedule'
+      with:
         ref: main
+
+    - name: Checkout repo (push to main)
+      uses: actions/checkout@v3
+      if: github.event_name == 'push'
+      with:
+        ref: main # Checkout the feature branch on a pull request event
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
@@ -32,7 +42,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f requirements.lock ]; then pip install -r requirements.lock; fi
     
     - name: Data Extract
       run: python src/data/make_dataset.py
