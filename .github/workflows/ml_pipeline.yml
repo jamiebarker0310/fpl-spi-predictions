@@ -20,8 +20,8 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.head.ref }} # Checkout the feature branch on a pull request event
         # Check if the event is a scheduled event, and checkout the main branch if true
-        if: github.event_name == 'schedule'
-        ref: main
+        # if: github.event_name == 'schedule'
+        # ref: main
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
