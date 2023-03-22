@@ -1,0 +1,57 @@
+name: ml_pipeline
+
+on:
+  schedule:
+  # * is a special character in YAML so you have to quote this string
+  - cron:  '0 2 * * *'
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ml_pipeline:
+    name: ml pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.ref }} # Checkout the feature branch on a pull request event
+        # Check if the event is a scheduled event, and checkout the main branch if true
+        if: github.event_name == 'schedule'
+        ref: main
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.7"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Data Extract
+      run: python src/data/make_dataset.py
+    
+    - name: Build Features
+      run: python src/features/build_features.py
+    
+    - name: Goal Regression
+      run: python src/model_training/goal_regression.py
+    
+    - name: Result Simulation
+      run: python src/model_training/result_simulation.py
+    
+    - name: Update Models
+      uses: EndBug/add-and-commit@v9
+      with:
+        add: models/goal_regressor.joblib models/poisson.joblib
+        message: "daily model update"
+        committer_name: GitHub Actions
+        committer_email: actions@github.com
+        push: true
+
