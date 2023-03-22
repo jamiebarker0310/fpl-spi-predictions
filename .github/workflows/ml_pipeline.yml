@@ -15,13 +15,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repo (pull request)
       uses: actions/checkout@v3
       with:
         ref: ${{ github.event.pull_request.head.ref }} # Checkout the feature branch on a pull request event
-        # Check if the event is a scheduled event, and checkout the main branch if true
-        # if: github.event_name == 'schedule'
-        # ref: main
+        if: github.event_name == 'pull_request'
+    
+    - name: Checkout repo (schedule)
+      uses: actions/checkout@v3
+      with:
+        ref: main
+        if: github.event_name == 'schedule'
+
+    - name: Checkout repo (push to main)
+      uses: actions/checkout@v3
+      with:
+        ref: main # Checkout the feature branch on a pull request event
+        if: github.event_name == 'push'
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
