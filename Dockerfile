@@ -16,5 +16,10 @@ COPY ./models/poisson.joblib ./models/poisson.joblib
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.lock
 
+# required for lgbm
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+RUN apt-get -y install curl
+RUN apt-get install libgomp1
+
 # Run by specifying the host and port
 CMD exec uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
