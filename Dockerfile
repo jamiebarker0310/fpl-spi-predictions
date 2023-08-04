@@ -3,7 +3,7 @@ FROM python:3.7-slim
 
 # Create the directory for the container
 WORKDIR /app
-COPY requirements.txt ./requirements.txt
+COPY requirements.lock ./requirements.lock
 COPY ./src/api/main.py ./src/api/main.py
 COPY ./src/models ./src/models
 COPY ./setup.py ./setup.py
@@ -14,7 +14,7 @@ COPY ./models/poisson.joblib ./models/poisson.joblib
 
 # Install the dependencies
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.lock
 
 # Run by specifying the host and port
 CMD exec uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
