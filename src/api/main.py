@@ -30,7 +30,7 @@ class Team(str, Enum):
     new = "Newcastle"
     nfo = "Nottingham Forest"
     shu = "Sheffield United"
-    tot = "Tottenham Hostpur"
+    tot = "Tottenham Hotspur"
     whu = "West Ham United"
     wol = "Wolverhampton"
 
