@@ -2,6 +2,7 @@ black>=23.1.0
 httpx>=0.23.0
 fastapi>=0.92.0
 flake8>=5.0.4
+lightgbm>=3.3.5
 matplotlib>=3.5.3
 numpy>=1.21.6
 pandas>=1.3.5

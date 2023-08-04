@@ -3,6 +3,7 @@ from xgboost import XGBRegressor
 from joblib import dump, load
 import logging
 
+from lightgbm import LGBMRegressor
 from scipy import stats
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -37,7 +38,7 @@ def create_pipeline(df_team):
         [
             ("spi_mapper", SPIMapper(df_team)),
             ("preprocessor", column_transformer),
-            ("regressor", MultiOutputRegressor(XGBRegressor())),
+            ("regressor", MultiOutputRegressor(LGBMRegressor())),
         ]
     )
 
@@ -53,7 +54,7 @@ def create_search(df_team, n_iter=60):
         "regressor__estimator__n_estimators": stats.randint(100, 200),
         "regressor__estimator__subsample": stats.uniform(0.8, 0.2),
         "regressor__estimator__colsample_bytree": stats.uniform(0.8, 0.2),
-        "regressor__estimator__gamma": stats.uniform(0, 0.2),
+        # "regressor__estimator__gamma": stats.uniform(0, 0.2),
         "regressor__estimator__reg_alpha": stats.loguniform(10**-3, 0.5),
         "regressor__estimator__reg_lambda": stats.loguniform(10**-3, 10),
     }
