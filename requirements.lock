@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.lock requirements.txt
 #
--e file:///Users/jamiebarker/GitHub/fpl-spi-predictions
+-e .
     # via -r requirements.txt
 anyio==3.6.2
     # via
